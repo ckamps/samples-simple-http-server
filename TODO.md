@@ -1,5 +1,7 @@
 # TO DO - Simple Apache HTTP Server
 
+* Supoort 3 AZs.
+
 * Add option to create DNS FQDN and associate with ALB listeners.
 
 * Add option to configure HTTPS/TLS.
