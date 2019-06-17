@@ -45,7 +45,8 @@ else
 fi
 
 if [ -z ${ACCOUNT_ARG+x} ]; then
-  ACCOUNT=123456789012
+  echo 'Must supply --account|-a argument with AWS account ID'
+  exit 1
 else
   ACCOUNT=$ACCOUNT_ARG
 fi
