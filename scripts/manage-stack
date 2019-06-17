@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+
+#set -x
+
+PARAMS=""
+while (( "$#" )); do
+  case "$1" in
+    -o|--org)
+      ORG_ARG=$2
+      shift 2
+      ;;
+    -u|--update)
+      UPDATE=1
+      shift 1
+      ;;
+    -v|--vpc-name)
+      VPC_NAME_ARG=$2
+      shift 2
+      ;;
+    -s|--stack-name)
+      STACK_NAME_ARG=$2
+      shift 2
+      ;;
+    -e|--env-purpose)
+      ENV_PURPOSE_ARG=$2
+      shift 2
+      ;;
+    -o|--owner-email)
+      OWNER_EMAIL_ARG=$2
+      shift 1
+      ;;
+    -n|--server-count)
+      SERVER_COUNT_ARG=$2
+      shift 2
+      ;;
+    -t|--template)
+      TEMPLATE_ARG=$2
+      shift 2
+      ;;
+    -c|--cost-center)
+      COST_CENTER_ARG=$2
+      shift 2
+      ;;
+    -p|--profile)
+      PROFILE_ARG=$2
+      shift 2
+      ;;
+    -r|--region)
+      REGION_ARG=$2
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*|--*=)
+      echo "Error: Unsupported flag $1" >&2
+      exit 1
+      ;;
+    *)
+      PARAMS="$PARAMS $1"
+      shift
+      ;;
+  esac
+done
+
+eval set -- "$PARAMS"
+
+if [ -z ${ORG_ARG+x} ]; then
+  ORG=acme
+else
+  ORG=$ORG_ARG
+fi
+
+if [ -z $UPDATE ]; then
+  CMD='create-stack --enable-termination-protection'
+else
+  CMD='update-stack'
+fi
+
+if [ -z ${ENV_PURPOSE_ARG+x} ]; then
+  echo 'Must supply --env-purpose|-e argument with qualifier of the environment purpose'
+  exit 1
+else
+  ENV_PURPOSE=$ENV_PURPOSE_ARG
+fi
+
+if [ -z ${OWNER_EMAIL_ARG+x} ]; then
+  echo 'Must supply --owner-email|-o argument with email address of owner'
+  exit 1
+else
+  OWNER_EMAIL=$OWNER_EMAIL_ARG
+fi
+
+if [ -z ${VPC_NAME_ARG+x} ]; then
+  VPC_NAME=shared
+else
+  VPC_NAME=$VPC_NAME_ARG
+fi
+
+if [ -z ${SERVER_COUNT_ARG+x} ]; then
+  SERVER_COUNT=2
+else
+  SERVER_COUNT=$SERVER_COUNT_ARG
+fi
+
+if [ -z ${STACK_NAME_ARG+x} ]; then
+  STACK_NAME=sample-http-server-${ENV_PURPOSE}
+else
+  STACK_NAME=$STACK_NAME_ARG
+fi
+
+if [ -z ${TEMPLATE_ARG+x} ]; then
+  TEMPLATE=samples-simple-http-server.yml
+else
+  TEMPLATE=$TEMPLATE_ARG
+fi
+
+if [ -z ${COST_CENTER_ARG+x} ]; then
+  echo 'Must supply --cost-center|-c argument in form nnnnnn'
+  exit 1
+else
+  COST_CENTER=$COST_CENTER_ARG
+fi
+
+if [ -z ${PROFILE_ARG+x} ]; then
+  PROFILE=admin
+else
+  PROFILE=$PROFILE_ARG
+fi
+
+if [ -z ${REGION_ARG+x} ]; then
+  REGION=us-east-1
+else
+  REGION=$PROFILE_ARG
+fi
+
+aws cloudformation ${CMD} \
+                     --stack-name ${STACK_NAME} \
+                     --template-body file://../${TEMPLATE} \
+                     --parameters \
+                         ParameterKey=pEnvPurpose,ParameterValue=${ENV_PURPOSE} \
+                         ParameterKey=pVpcName,ParameterValue=${VPC_NAME} \
+                         ParameterKey=pServerCount,ParameterValue=${SERVER_COUNT} \
+                     --tags \
+                         Key=${ORG}-service-id,Value=samples.http \
+                         Key=${ORG}-env-purpose,Value=${ENV_PURPOSE} \
+                         Key=${ORG}-owner,Value=${OWNER_EMAIL} \
+                         Key=${ORG}-cost-center,Value=${COST_CENTER} \
+                         Key=${ORG}-data-class,Value=internal \
+                         Key=${ORG}-privacy-class,Value=low \
+                     --capabilities CAPABILITY_NAMED_IAM \
+                     --region ${REGION} \
+                     --profile ${PROFILE}
+
+#aws cloudformation wait stack-create-complete --stack-name ${STACK_NAME} --region ${AWS_REGION} --profile ${AWS_PROFILE}
