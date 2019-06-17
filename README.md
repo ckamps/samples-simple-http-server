@@ -64,4 +64,4 @@ These parameters apply to the heavy lifting stack `samples-simple-http-server.ym
 |`pAlbScheme`|Optional|`internal` or `internet-facing`. The scheme of the Application Load Balancer (ALB)|`internet-facing`|
 |`pAlbIngressCidrIp`|Optional|CIDR block to restrict ingress access.|`0.0.0.0/0`|
 |`pServerCount`|Optional|Number of EC2 instances to spin up as part of the ASG|`1`|
-|`pInstanceType`|Optional|EC2 instance type. See the template for supported types|`t2.micro`|
+|`pInstanceType`|Optional|EC2 instance type. See the template for supported types|`t3a.micro`|
