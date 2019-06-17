@@ -394,7 +394,7 @@ Resources:
   rCloudWatchLogsAgentGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub '${pSystem}-${pApp}-${pEnvPurpose}-cloud-watch-logs-agent'
+      LogGroupName: !Sub '/${pSystem}/${pApp}/ec2/${pEnvPurpose}'
       RetentionInDays: 1
 
   rInstanceProfile:

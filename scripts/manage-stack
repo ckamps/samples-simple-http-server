@@ -25,7 +25,7 @@ while (( "$#" )); do
       ENV_PURPOSE_ARG=$2
       shift 2
       ;;
-    -o|--owner-email)
+    -m|--owner-email)
       OWNER_EMAIL_ARG=$2
       shift 1
       ;;
@@ -86,7 +86,7 @@ else
 fi
 
 if [ -z ${OWNER_EMAIL_ARG+x} ]; then
-  echo 'Must supply --owner-email|-o argument with email address of owner'
+  echo 'Must supply --owner-email|-m argument with email address of owner'
   exit 1
 else
   OWNER_EMAIL=$OWNER_EMAIL_ARG

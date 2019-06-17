@@ -126,7 +126,7 @@ Resources:
         pInstanceType: !Ref pInstanceType
       Tags:
         - Key: !Sub ${pOrg}-service-id
-          Value: !Sub ${pOrg}.samples.http
+          Value: samples.http
         - Key: !Sub ${pOrg}-env-purpose
           Value: !Ref pEnvPurpose
         - Key: !Sub ${pOrg}-owner

@@ -39,7 +39,7 @@ done
 eval set -- "$PARAMS"
 
 if [ -z ${ORG_ARG+x} ]; then
-  ORG=test
+  ORG=acme
 else
   ORG=$ORG_ARG
 fi
