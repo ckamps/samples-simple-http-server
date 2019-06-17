@@ -1,6 +1,8 @@
 # TO DO - Simple Apache HTTP Server
 
-* Supoort 3 AZs.
+* Support  3 AZs.
+
+* Add topology diagram.
 
 * Add option to create DNS FQDN and associate with ALB listeners.
 
