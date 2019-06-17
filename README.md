@@ -26,7 +26,7 @@ https://...
 
 The heavy lifting stack template is built to be compatible with deploying the sample application to a VPC that has already been created using the `infra-vpc-multi-tier.yml` CloudFormation template.
 
-https://github.com/ckamps/infra-aws-vpc-miulti-tier
+https://github.com/ckamps/infra-aws-vpc-multi-tier
 
 The VPC multi-tier template exports a set of outputs to the account in which it is deployed.
 
