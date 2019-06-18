@@ -260,13 +260,13 @@ Resources:
               --region ${AWS::Region}
 
     Metadata:
-      'AWS::CloudFormation::Init':
+      AWS::CloudFormation::Init:
         configSets:
           All:
-            - ConfigureCloudWatchMetrics
-            - ConfigureCloudWatchLogsAgent
-            - ConfigureSampleWorkload
-        ConfigureCloudWatchMetrics:
+            - 01-ConfigureCloudWatchMetrics
+            - 02-ConfigureCloudWatchLogsAgent
+            - 03-ConfigureSampleWorkload
+        01-ConfigureCloudWatchMetrics:
           packages:
             yum:
               perl-Switch: []
@@ -285,13 +285,13 @@ Resources:
               owner: ec2-user
               group: ec2-user
           commands:
-            01_YumUpdateMonitoring:
+            01-YumUpdateMonitoring:
               command: yum update -y
-            02_MonitoringCron:
+            02-MonitoringCron:
               command: >-
                 chmod +x /home/ec2-user/aws-scripts-mon/*.pl && crontab -u
                 ec2-user /home/ec2-user/crontab && rm /home/ec2-user/crontab
-        ConfigureCloudWatchLogsAgent:
+        02-ConfigureCloudWatchLogsAgent:
           packages:
             yum:
               awslogs: []
@@ -349,13 +349,13 @@ Resources:
               owner: root
               group: root
           commands:
-            create-awslogs-state-file:
+            01-create-awslogs-state-file:
               command: 'mkdir -p /var/awslogs/state'
-            enable-awslogsd:
+            02-enable-awslogsd:
               command: 'systemctl enable awslogsd.service'
-            start-awslogsd:
+            03-start-awslogsd:
               command: 'systemctl start awslogsd'
-        ConfigureSampleWorkload:
+        03-ConfigureSampleWorkload:
           packages:
             yum:
               httpd: []
@@ -367,11 +367,11 @@ Resources:
               owner: root
               group: root
           commands:
-            modify-index-html:
+            01-modify-index-html:
               command: 'echo "<p>Served from $(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id)" >> /var/www/html/index.html'
-            enable-httpd:
+            02-enable-httpd:
               command: 'systemctl enable httpd.service'
-            start-httpd:
+            03-start-httpd:
               command: 'systemctl start httpd'
 
   rRole:
