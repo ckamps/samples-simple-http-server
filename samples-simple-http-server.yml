@@ -20,7 +20,7 @@ Metadata:
       Parameters:
       - pVpcName
       - pAlbSubnetNameQualifier
-      - pWebServerSubnetNameQualifier
+      - pWebSubnetNameQualifier
     - Label:
         default: Auto Scaling
       Parameters:
@@ -42,7 +42,7 @@ Metadata:
         default: VPC Name
       pAlbSubnetNameQualifier:
         default: ALB Subnet Name Qualifier
-      pWebServerSubnetNameQualifier:
+      pWebSubnetNameQualifier:
         default: Web Server Subnet Name Qualifier
       pAlbScheme:
         default: Application Load Balancer (ALB) Scheme
@@ -83,7 +83,7 @@ Parameters:
     Type: String
     Default: public
 
-  pWebServerSubnetNameQualifier:
+  pWebSubnetNameQualifier:
     Description: Name qualifier for subnet in which web server is to be deployed
     Type: String
     Default: private
@@ -200,8 +200,8 @@ Resources:
       MaxSize: '4'
       DesiredCapacity: !Ref pServerCount
       VPCZoneIdentifier:
-        - Fn::ImportValue: !Sub '${pVpcName}-${pWebServerSubnetNameQualifier}-subnet-id-1'
-        - Fn::ImportValue: !Sub '${pVpcName}-${pWebServerSubnetNameQualifier}-subnet-id-2'
+        - Fn::ImportValue: !Sub '${pVpcName}-${pWebSubnetNameQualifier}-subnet-id-1'
+        - Fn::ImportValue: !Sub '${pVpcName}-${pWebSubnetNameQualifier}-subnet-id-2'
       TargetGroupARNs:
         - !Ref rTargetGroup
       LaunchConfigurationName: !Ref rLaunchConfig
