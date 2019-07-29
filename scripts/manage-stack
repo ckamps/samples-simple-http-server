@@ -124,9 +124,9 @@ else
 fi
 
 if [ -z ${PROFILE_ARG+x} ]; then
-  PROFILE=admin
+  PROFILE=
 else
-  PROFILE=$PROFILE_ARG
+  PROFILE="--profile $PROFILE_ARG"
 fi
 
 if [ -z ${REGION_ARG+x} ]; then
@@ -151,6 +151,6 @@ aws cloudformation ${CMD} \
                          Key=${ORG}-privacy-class,Value=low \
                      --capabilities CAPABILITY_NAMED_IAM \
                      --region ${REGION} \
-                     --profile ${PROFILE}
+                     ${PROFILE}
 
 #aws cloudformation wait stack-create-complete --stack-name ${STACK_NAME} --region ${AWS_REGION} --profile ${AWS_PROFILE}
