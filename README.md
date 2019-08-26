@@ -62,6 +62,7 @@ These parameters apply to the heavy lifting stack `samples-simple-http-server.ym
 |`pAlbSubnetNameQualifier`|Optional|The subnet name qualifier of the tier in which to deploy the Autoscaling Group. Used to construct references to the necessary exported CloudFormation outputs from the network stack.|`public`|
 |`pWebServerSubnetNameQualifier`|Optional|The subnet name qualifier of the tier in which to deploy the Apache HTTP server. Used to construct references to the necessary exported CloudFormation outputs from the network stack.|`private`|
 |`pAlbScheme`|Optional|`internal` or `internet-facing`. The scheme of the Application Load Balancer (ALB)|`internet-facing`|
-|`pAlbIngressCidrIp`|Optional|CIDR block to restrict ingress access.|`0.0.0.0/0`|
+|`pAlbIngressCidr`|Optional|CIDR block to restrict ingress access.||
+|`pAlbIngressPrefixListId`|Optional|Prefix list ID to restrict ingress access.||
 |`pServerCount`|Optional|Number of EC2 instances to spin up as part of the ASG|`1`|
 |`pInstanceType`|Optional|EC2 instance type. See the template for supported types|`t3a.micro`|

@@ -29,6 +29,14 @@ while (( "$#" )); do
       OWNER_EMAIL_ARG=$2
       shift 1
       ;;
+    --cidr)
+      CIDR_ARG=$2
+      shift 2
+      ;;
+    --prefix-list-id)
+      PREFIX_LIST_ID_ARG=$2
+      shift 2
+      ;;
     -n|--server-count)
       SERVER_COUNT_ARG=$2
       shift 2
@@ -98,6 +106,17 @@ else
   VPC_NAME=$VPC_NAME_ARG
 fi
 
+if [ -z ${PREFIX_LIST_ID_ARG+x} ]; then
+  if [ -z ${CIDR_ARG+x} ]; then
+    CIDR=0.0.0.0/0
+  else
+    CIDR=$CIDR_ARG
+  fi
+  ALB_INGRESS="ParameterKey=pAlbIngressCidr,ParameterValue=${CIDR}"
+else
+  ALB_INGRESS="ParameterKey=pAlbIngressPrefixListId,ParameterValue=${PREFIX_LIST_ID_ARG}"
+fi
+
 if [ -z ${SERVER_COUNT_ARG+x} ]; then
   SERVER_COUNT=2
 else
@@ -142,6 +161,7 @@ aws cloudformation ${CMD} \
                          ParameterKey=pEnvPurpose,ParameterValue=${ENV_PURPOSE} \
                          ParameterKey=pVpcName,ParameterValue=${VPC_NAME} \
                          ParameterKey=pServerCount,ParameterValue=${SERVER_COUNT} \
+                         ${ALB_INGRESS} \
                      --tags \
                          Key=${ORG}-service-id,Value=samples.http \
                          Key=${ORG}-env-purpose,Value=${ENV_PURPOSE} \

@@ -26,6 +26,11 @@ Metadata:
       Parameters:
       - pVpcName
     - Label:
+        default: Load Balancer
+      Parameters:
+      - pAlbIngressCidr
+      - pAlbIngressPrefixListId
+    - Label:
         default: Auto Scaling
       Parameters:
       - pServerCount
@@ -49,6 +54,10 @@ Metadata:
         default: VPC Name (name of existing VPC)
       pOrg:
         default: Business Scope
+      pAlbIngressCidr:
+        default: Application Load Balancer (ALB) Allowed Ingress CIDR IP Range
+      pAlbIngressPrefixListId:
+        default: Application Load Balancer (ALB) Allowed Prefix List ID
       pServerCount:
         default: Number of EC2 Instances
       pInstanceType:
@@ -74,6 +83,16 @@ Parameters:
     Type: String
     Description: Used to qualify resource tag names
     Default: acme
+
+  pAlbIngressCidr:
+    Description: IP address range that can be used to access the ALB
+    Type: String
+    Default: ''
+
+  pAlbIngressPrefixListId:
+    Description: ID of the prefix list representing the service that can be used to access the ALB
+    Type: String
+    Default: ''
 
   pServerCount:
     Description: Number of Amazon EC2 instances to launch for the web server
@@ -120,10 +139,12 @@ Resources:
     Properties:
       TemplateURL:  !Sub https://s3.amazonaws.com/${pArtifactBucket}/cfn-templates/samples-simple-http-server.yml
       Parameters:
-        pEnvPurpose:   !Ref pEnvPurpose
-        pVpcName:      !Ref pVpcName
-        pServerCount:  !Ref pServerCount
-        pInstanceType: !Ref pInstanceType
+        pEnvPurpose:             !Ref pEnvPurpose
+        pVpcName:                !Ref pVpcName
+        pAlbIngressCidr:         !Ref pAlbIngressCidr
+        pAlbIngressPrefixListId: !Ref pAlbIngressPrefixListId
+        pServerCount:            !Ref pServerCount
+        pInstanceType:           !Ref pInstanceType
       Tags:
         - Key: !Sub ${pOrg}-service-id
           Value: samples.http

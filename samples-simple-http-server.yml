@@ -22,10 +22,14 @@ Metadata:
       - pAlbSubnetNameQualifier
       - pWebSubnetNameQualifier
     - Label:
-        default: Auto Scaling
+        default: Load Balancer
       Parameters:
       - pAlbScheme
-      - pAlbIngressCidrIp
+      - pAlbIngressCidr
+      - pAlbIngressPrefixListId
+    - Label:
+        default: Auto Scaling
+      Parameters:
       - pServerCount
       - pInstanceType
 
@@ -46,8 +50,10 @@ Metadata:
         default: Web Server Subnet Name Qualifier
       pAlbScheme:
         default: Application Load Balancer (ALB) Scheme
-      pAlbIngressCidrIp:
+      pAlbIngressCidr:
         default: Application Load Balancer (ALB) Allowed Ingress CIDR IP Range
+      pAlbIngressPrefixListId:
+        default: Application Load Balancer (ALB) Allowed Prefix List ID
       pServerCount:
         default: Number of EC2 Instances
       pInstanceType:
@@ -96,14 +102,15 @@ Parameters:
     - internal
     - internet-facing
 
-  pAlbIngressCidrIp:
+  pAlbIngressCidr:
     Description: IP address range that can be used to access the ALB
     Type: String
-    MinLength: '9'
-    MaxLength: '18'
-    Default: 0.0.0.0/0
-    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
-    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    Default: ''
+
+  pAlbIngressPrefixListId:
+    Description: ID of the prefix list representing the service that can be used to access the ALB
+    Type: String
+    Default: ''
 
   pServerCount:
     Description: Number of Amazon EC2 instances to launch for the web server
@@ -137,6 +144,10 @@ Mappings:
     us-west-2:
       HVM64: ami-0cb72367e98845d43
 
+Conditions:
+  cAlbIngressUseCidr: !Not [!Equals [ !Ref 'pAlbIngressCidr', '' ] ]
+  cAlbIngressUsePrefixListId: !Not [!Equals [ !Ref 'pAlbIngressPrefixListId', '' ] ]
+
 Resources:
   rAlb:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -158,7 +169,8 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: !Ref pAlbIngressCidrIp
+          CidrIp: !If [ cAlbIngressUseCidr, !Ref pAlbIngressCidr, !Ref 'AWS::NoValue' ]
+          SourcePrefixListId: !If [ cAlbIngressUsePrefixListId, !Ref pAlbIngressPrefixListId, !Ref 'AWS::NoValue' ]
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 80
