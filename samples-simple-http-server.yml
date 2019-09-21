@@ -31,6 +31,7 @@ Metadata:
         default: Auto Scaling
       Parameters:
       - pServerCount
+      - pAmiId
       - pInstanceType
 
     ParameterLabels:
@@ -58,6 +59,8 @@ Metadata:
         default: Number of EC2 Instances
       pInstanceType:
         default: EC2 Instance Type
+      pAmiId:
+        default: EC2 AMI ID
 
 Parameters:
   pOrg:
@@ -117,6 +120,10 @@ Parameters:
     Type: Number
     Default: '1'
 
+  pAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-ebs'
+
   pInstanceType:
     Description: WebServer EC2 instance type
     Type: String
@@ -126,23 +133,6 @@ Parameters:
       - t3a.small
       - t3a.medium
     ConstraintDescription: must be a valid EC2 instance type.
-
-Mappings:
-  mAWSInstanceType2Arch:
-    t3a.micro:
-      Arch: HVM64
-    t3a.small:
-      Arch: HVM64
-    t3a.medium:
-      Arch: HVM64
-
-  mAWSRegionArch2AMI:
-    us-east-1:
-      HVM64: ami-0c6b1d09930fac512
-    us-west-1:
-      HVM64: ami-015954d5e5548d13b
-    us-west-2:
-      HVM64: ami-0cb72367e98845d43
 
 Conditions:
   cAlbIngressUseCidr: !Not [!Equals [ !Ref 'pAlbIngressCidr', '' ] ]
@@ -244,13 +234,7 @@ Resources:
     Properties:
       LaunchConfigurationName: !Sub '${pSystem}-${pApp}-${pEnvPurpose}'
       InstanceType: !Ref pInstanceType
-      ImageId: !FindInMap
-        - mAWSRegionArch2AMI
-        - !Ref AWS::Region
-        - !FindInMap
-          - mAWSInstanceType2Arch
-          - !Ref pInstanceType
-          - Arch
+      ImageId: !Ref pAmiId
       IamInstanceProfile: !Ref rInstanceProfile
       SecurityGroups:
         - !Ref rInstanceSecurityGroup

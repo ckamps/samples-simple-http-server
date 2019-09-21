@@ -65,4 +65,5 @@ These parameters apply to the heavy lifting stack `samples-simple-http-server.ym
 |`pAlbIngressCidr`|Optional|CIDR block to restrict ingress access.||
 |`pAlbIngressPrefixListId`|Optional|Prefix list ID to restrict ingress access.||
 |`pServerCount`|Optional|Number of EC2 instances to spin up as part of the ASG|`1`|
+|`pAmiId`|Optional|EC2 AMI ID.|Resolved value of SSM parameter: `/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-ebs`|
 |`pInstanceType`|Optional|EC2 instance type. See the template for supported types|`t3a.micro`|
