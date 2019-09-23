@@ -18,9 +18,11 @@ Metadata:
     - Label:
         default: Network
       Parameters:
-      - pVpcName
-      - pAlbSubnetNameQualifier
-      - pWebSubnetNameQualifier
+      - pVpcId
+      - pAlbSubnetId1
+      - pAlbSubnetId2
+      - pWebSubnetId1
+      - pWebSubnetId2
     - Label:
         default: Load Balancer
       Parameters:
@@ -43,12 +45,16 @@ Metadata:
         default: System Identifier
       pApp:
         default: Application Identifier
-      pVpcName:
-        default: VPC Name
-      pAlbSubnetNameQualifier:
-        default: ALB Subnet Name Qualifier
-      pWebSubnetNameQualifier:
-        default: Web Server Subnet Name Qualifier
+      pVpcId:
+        default: VPC ID
+      pAlbSubnetId1:
+        default: ALB Subnet ID 1
+      pAlbSubnetId2:
+        default: ALB Subnet ID 2
+      pWebSubnetId1:
+        default: Web Server Subnet ID 1
+      pWebSubnetId2:
+        default: Web Server Subnet ID 2
       pAlbScheme:
         default: Application Load Balancer (ALB) Scheme
       pAlbIngressCidr:
@@ -83,19 +89,25 @@ Parameters:
     Description: Used to qualify resource names. 10 characters max.
     AllowedPattern: '^[a-zA-Z0-9-_]{1,10}$'
 
-  pVpcName:
-    Description: Name of the existing VPC
-    Type: String
+  pVpcId:
+    Description: ID of existing VPC
+    Type: AWS::EC2::VPC::Id
 
-  pAlbSubnetNameQualifier:
-    Description: Name qualifier for subnet in which ALB is to be deployed
-    Type: String
-    Default: public
+  pAlbSubnetId1:
+    Description: ID of 1 of 2 subnets in which ALB is to be deployed
+    Type: AWS::EC2::Subnet::Id
 
-  pWebSubnetNameQualifier:
-    Description: Name qualifier for subnet in which web server is to be deployed
-    Type: String
-    Default: private
+  pAlbSubnetId2:
+    Description: ID of 2 of 2 subnets in which ALB is to be deployed
+    Type: AWS::EC2::Subnet::Id
+
+  pWebSubnetId1:
+    Description: ID or 1 or 2 subnets in which web server is to be deployed
+    Type: AWS::EC2::Subnet::Id
+
+  pWebSubnetId2:
+    Description: ID or 3 or 2 subnets in which web server is to be deployed
+    Type: AWS::EC2::Subnet::Id
 
   pAlbScheme:
     Description: ALB Scheme
@@ -118,7 +130,7 @@ Parameters:
   pServerCount:
     Description: Number of Amazon EC2 instances to launch for the web server
     Type: Number
-    Default: '1'
+    Default: 1
 
   pAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
@@ -134,6 +146,17 @@ Parameters:
       - t3a.medium
     ConstraintDescription: must be a valid EC2 instance type.
 
+Rules:
+  SubnetsInVPC:
+    Assertions:
+      - Assert:
+          'Fn::EachMemberIn':
+            - 'Fn::ValueOfAll':
+                - 'AWS::EC2::Subnet::Id'
+                - VpcId
+            - 'Fn::RefAll': 'AWS::EC2::VPC::Id'
+        AssertDescription: All subnets must in the VPC
+
 Conditions:
   cAlbIngressUseCidr: !Not [!Equals [ !Ref 'pAlbIngressCidr', '' ] ]
   cAlbIngressUsePrefixListId: !Not [!Equals [ !Ref 'pAlbIngressPrefixListId', '' ] ]
@@ -147,14 +170,15 @@ Resources:
       SecurityGroups:
         - !Ref rAlbSecurityGroup
       Subnets:
-        - Fn::ImportValue: !Sub '${pVpcName}-${pAlbSubnetNameQualifier}-subnet-id-1'
-        - Fn::ImportValue: !Sub '${pVpcName}-${pAlbSubnetNameQualifier}-subnet-id-2'
+        - !Ref pAlbSubnetId1
+        - !Ref pAlbSubnetId2
 
   rAlbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Sub '${pSystem}-${pApp}-alb-${pEnvPurpose}'
       GroupDescription: HTTP Access from any location
+      VpcId: !Ref pVpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -166,8 +190,6 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-      VpcId:
-          Fn::ImportValue: !Sub '${pVpcName}-vpc-id'
 
   rHttpListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -183,8 +205,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: !Sub '${pSystem}-${pApp}-${pEnvPurpose}'
-      VpcId:
-          Fn::ImportValue: !Sub '${pVpcName}-vpc-id'
+      VpcId: !Ref pVpcId
       HealthCheckIntervalSeconds: 15
       HealthCheckTimeoutSeconds: 10
       HealthCheckPath: /
@@ -202,8 +223,8 @@ Resources:
       MaxSize: '4'
       DesiredCapacity: !Ref pServerCount
       VPCZoneIdentifier:
-        - Fn::ImportValue: !Sub '${pVpcName}-${pWebSubnetNameQualifier}-subnet-id-1'
-        - Fn::ImportValue: !Sub '${pVpcName}-${pWebSubnetNameQualifier}-subnet-id-2'
+        - !Ref pWebSubnetId1
+        - !Ref pWebSubnetId2
       TargetGroupARNs:
         - !Ref rTargetGroup
       LaunchConfigurationName: !Ref rLaunchConfig
@@ -220,8 +241,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Sub '${pSystem}-${pApp}-ec2-${pEnvPurpose}'
-      VpcId:
-          Fn::ImportValue: !Sub '${pVpcName}-vpc-id'
+      VpcId: !Ref pVpcId
       GroupDescription: Allow access via HTTP
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -404,7 +424,5 @@ Resources:
 Outputs:
 
   oUrl:
-    Value: !GetAtt
-      - rAlb
-      - DNSName
+    Value: !GetAtt rAlb.DNSName
     Description: Newly created application URL

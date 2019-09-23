@@ -20,24 +20,6 @@ See the following documentation on how to launch the sample application, test it
 
 https://...
 
-## Usage
-
-## Dependence on Standard VPC Stack
-
-The heavy lifting stack template is built to be compatible with deploying the sample application to a VPC that has already been created using the `infra-vpc-multi-tier.yml` CloudFormation template.
-
-https://github.com/ckamps/infra-aws-vpc-multi-tier
-
-The VPC multi-tier template exports a set of outputs to the account in which it is deployed.
-
-This sample application template depends on the following outputs being exported in the account:
-
-* `${pVpcName}-vpc-id`
-* `${pVpcName}-${pAlbSubnetNameQualifier}-subnet-id-1`
-* `${pVpcName}-${pAlbSubnetNameQualifier}-subnet-id-2`
-* `${pVpcName}-${pWebServerSubnetNameQualifier}-subnet-id-1`
-* `${pVpcName}-${pWebServerSubnetNameQualifier}-subnet-id-2`
-
 ## Helper Scripts
 
 ### `scripts/manage-stack`
@@ -54,13 +36,15 @@ These parameters apply to the heavy lifting stack `samples-simple-http-server.ym
 
 |Parameter|Required|Description|Default|
 |---------|--------|-----------|-------|
-|`pVpcName`|Required|name of the VPC to which to deploy the application.|None|
+|`pVpcId`|Required|ID of the VPC to which to deploy the application.|None|
 |`pOrg`|Optional|Per AWS resource naming standard, the business organization to apply to resources such as IAM roles.|`acme`|
 |`pSystem`|Optional|Per AWS resource naming standards, system ID to apply to AWS resources.|`samples`|
 |`pApp`|Optional|Per AWS resource naming standards, app ID to apply to AWS resources.|`http`|
 |`pEnvPurpose`|Optional|Per AWS resource naming standards, qualifier as to purpose of this instance.|None|
-|`pAlbSubnetNameQualifier`|Optional|The subnet name qualifier of the tier in which to deploy the Autoscaling Group. Used to construct references to the necessary exported CloudFormation outputs from the network stack.|`public`|
-|`pWebServerSubnetNameQualifier`|Optional|The subnet name qualifier of the tier in which to deploy the Apache HTTP server. Used to construct references to the necessary exported CloudFormation outputs from the network stack.|`private`|
+|`pAlbSubnetId1`|Optional|Subnet ID 1 or 2 in which to deploy the Autoscaling Group.||
+|`pAlbSubnetId2`|Optional|Subnet ID 2 or 2 in which to deploy the Autoscaling Group.||
+|`pWebSubnetId1`|Optional|Subnet ID 1 or 2 in which to deploy the Apache HTTP server.||
+|`pWebSubnetId2`|Optional|Subnet ID 2 or 2 in which to deploy the Apache HTTP server.||
 |`pAlbScheme`|Optional|`internal` or `internet-facing`. The scheme of the Application Load Balancer (ALB)|`internet-facing`|
 |`pAlbIngressCidr`|Optional|CIDR block to restrict ingress access.||
 |`pAlbIngressPrefixListId`|Optional|Prefix list ID to restrict ingress access.||
