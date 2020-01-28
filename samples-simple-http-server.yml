@@ -3,16 +3,20 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: ASG of Apache HTTP Server with ALB and CloudWatch Agent
 
 Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+      - W2509
   AWS::CloudFormation::Interface:
     ParameterGroups:
     - Label:
-        default: Application Classification
+        default: System Classification
       Parameters:
       - pOrg
       - pSystem
       - pApp
     - Label:
-        default: Application Environment
+        default: System Environment
       Parameters:
       - pEnvPurpose
     - Label:
@@ -274,7 +278,6 @@ Resources:
               --stack ${AWS::StackName} \
               --resource rAsg \
               --region ${AWS::Region}
-
     Metadata:
       AWS::CloudFormation::Init:
         configSets:
@@ -404,9 +407,9 @@ Resources:
               Service: ec2.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
-
+        
   rCloudWatchLogsAgentGroup:
     Type: AWS::Logs::LogGroup
     Properties:
