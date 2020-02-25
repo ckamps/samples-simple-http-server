@@ -39,6 +39,10 @@ Metadata:
       - pServerCount
       - pAmiId
       - pInstanceType
+    - Label:
+        default: Permissions Boundary
+      Parameters:    
+      - pPermissionsBoundaryArn
 
     ParameterLabels:
       pEnvPurpose:
@@ -71,6 +75,8 @@ Metadata:
         default: EC2 Instance Type
       pAmiId:
         default: EC2 AMI ID
+      pPermissionsBoundaryArn:
+        default: IAM Permissions Boundary ARN (optional)
 
 Parameters:
   pOrg:
@@ -150,6 +156,11 @@ Parameters:
       - t3a.medium
     ConstraintDescription: must be a valid EC2 instance type.
 
+  pPermissionsBoundaryArn:
+    Description: IAM Permissions Boundary ARN (optional)
+    Type: String
+    Default: ''
+
 Rules:
   SubnetsInVPC:
     Assertions:
@@ -164,6 +175,7 @@ Rules:
 Conditions:
   cAlbIngressUseCidr: !Not [!Equals [ !Ref 'pAlbIngressCidr', '' ] ]
   cAlbIngressUsePrefixListId: !Not [!Equals [ !Ref 'pAlbIngressPrefixListId', '' ] ]
+  cUsePermissionsBoundary: !Not [!Equals [ !Ref 'pPermissionsBoundaryArn', '' ] ]
 
 Resources:
   rAlb:
@@ -409,6 +421,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
         - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      PermissionsBoundary: !If [ cUsePermissionsBoundary, !Ref pPermissionsBoundaryArn, !Ref 'AWS::NoValue' ]
         
   rCloudWatchLogsAgentGroup:
     Type: AWS::Logs::LogGroup
